@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Orbit Gum Clicker - Естетична Гра для Ріти</title>
+    <!-- Tailwind CSS for modern responsive utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for minimalist icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Tone.js for web audio synthesizer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+        .title-font {
+            font-family: 'Quicksand', sans-serif;
+        }
+        @keyframes floatCloud {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(0.5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .floating-button {
+            animation: floatCloud 4s ease-in-out infinite;
+        }
+        .hover-scale {
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .hover-scale:hover, .hover-scale:active {
+            transform: scale(1.04) translateY(-2px);
+        }
+        .bounce-anim {
+            transform: scale(0.88) !important;
+            transition: transform 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(244, 114, 182, 0.6);
+            border-radius: 10px;
+        }
+        /* Ultra-realistic 3D Glossy Orbit Pill styles */
+        .orbit-pill-3d {
+            box-shadow: inset 0 3px 6px rgba(255, 255, 255, 0.85), 
+                        inset 0 -3px 8px rgba(0, 0, 0, 0.22),
+                        0 10px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .orbit-pill-3d::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 8px;
+            right: 8px;
+            height: 42%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.75), rgba(255,255,255,0.1));
+            border-radius: 9999px;
+            pointer-events: none;
+        }
+        .legendary-glow {
+            animation: goldGlow 1.8s ease-in-out infinite alternate;
+        }
+        @keyframes goldGlow {
+            0% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.6), inset 0 3px 6px rgba(255,255,255,0.9); }
+            100% { box-shadow: 0 0 35px rgba(234, 179, 8, 0.95), inset 0 3px 6px rgba(255,255,255,0.9); }
+        }
+        .golden-interface {
+            filter: sepia(0.8) saturate(2.5) brightness(1.05);
+            transition: filter 0.6s ease;
+        }
+        body.bw-mode {
+            filter: grayscale(100%) contrast(115%);
+        }
+        @keyframes airRaidPulse {
+            0% { background-color: rgba(239, 68, 68, 0.15); }
+            50% { background-color: rgba(59, 130, 246, 0.15); }
+            100% { background-color: rgba(239, 68, 68, 0.15); }
+        }
+        .air-raid-active {
+            animation: airRaidPulse 1.2s infinite;
+        }
+        .roulette-container {
+            perspective: 1000px;
+            overflow: hidden;
+            position: relative;
+        }
+        .roulette-track {
+            display: flex;
+            transition: transform 4s cubic-bezier(0.15, 0.85, 0.25, 1);
+        }
+        .roulette-item {
+            min-width: 120px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+            margin: 0 8px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body id="mainBody" class="bg-gradient-to-b from-pink-100 via-rose-50 to-pink-200 min-h-screen text-slate-700 flex flex-col items-center justify-between overflow-x-hidden relative transition-all duration-500">
+
+    <!-- Background Landscape SVG -->
+    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden flex flex-col justify-end">
+        <svg class="w-full h-full opacity-65" viewBox="0 0 1440 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="sunsetGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ffe4e6" stop-opacity="0.95"/>
+                    <stop offset="50%" stop-color="#ffb6c1" stop-opacity="0.65"/>
+                    <stop offset="100%" stop-color="#fbcfe8" stop-opacity="0.4"/>
+                </linearGradient>
+                <linearGradient id="mountain1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#f472b6" stop-opacity="0.25"/>
+                    <stop offset="100%" stop-color="#db2777" stop-opacity="0.45"/>
+                </linearGradient>
+                <linearGradient id="mountain2" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#fb7185" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#e11d48" stop-opacity="0.6"/>
+                </linearGradient>
+            </defs>
+            <rect width="1440" height="900" fill="url(#sunsetGrad)"/>
+            <circle cx="720" cy="460" r="150" fill="#fff" opacity="0.45"/>
+            <path d="M0 700 L360 400 L720 650 L1080 380 L1440 680 L1440 900 L0 900 Z" fill="url(#mountain1)"/>
+            <path d="M0 800 L240 580 L600 750 L960 520 L1320 780 L1440 700 L1440 900 L0 900 Z" fill="url(#mountain2)"/>
+        </svg>
+    </div>
+
+    <!-- Active Event Notification Banner -->
+    <div id="eventNotificationBanner" class="w-full bg-rose-600 text-white text-center py-2 px-4 text-xs sm:text-sm font-bold shadow-md z-30 hidden transition-all duration-300">
+        <span id="eventBannerText">⚡ Івент активний!</span>
+    </div>
+
+    <!-- Top Header Bar -->
+    <header class="w-full max-w-5xl p-4 sm:p-6 flex flex-wrap justify-between items-center gap-3 z-10">
+        <div class="floating-button flex items-center gap-2.5 bg-white/85 backdrop-blur-md px-4 py-2.5 rounded-full shadow-md border border-pink-200 hover-scale">
+            <span class="text-xl animate-bounce">💖</span>
+            <span class="title-font font-extrabold text-sm sm:text-base text-pink-600 tracking-wide">Orbit for Rita</span>
+        </div>
+        
+        <div class="flex items-center flex-wrap gap-2 sm:gap-3">
+            <button onclick="openModal('promoModal')" class="hover-scale bg-white/85 hover:bg-white backdrop-blur-md px-3.5 py-2.5 rounded-full shadow-md border border-pink-200 flex items-center gap-2 text-pink-600 font-semibold text-xs sm:text-sm cursor-pointer">
+                <i class="fa-solid fa-ticket text-pink-500"></i>
+                <span class="hidden xs:inline">Промокоди</span>
+            </button>
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="hover-scale bg-white/85 hover:bg-white backdrop-blur-md w-10 h-10 sm:w-11 sm:h-11 rounded-full shadow-md border border-pink-200 flex items-center justify-center text-pink-500 cursor-pointer" title="Музика">
+                <i id="soundIcon" class="fa-solid fa-volume-xmark text-base sm:text-lg"></i>
+            </button>
+            <button onclick="openModal('settingsModal')" class="hover-scale bg-white/85 hover:bg-white backdrop-blur-md w-10 h-10 sm:w-11 sm:h-11 rounded-full shadow-md border border-pink-200 flex items-center justify-center text-pink-500 cursor-pointer" title="Налаштування">
+                <i class="fa-solid fa-gear text-base sm:text-lg"></i>
+            </button>
+            <button onclick="openModal('inventoryModal')" class="floating-button hover-scale bg-white/85 hover:bg-white backdrop-blur-md px-3.5 sm:px-4 py-2.5 rounded-full shadow-md border border-pink-200 flex items-center gap-2 text-pink-600 font-semibold text-xs sm:text-sm cursor-pointer">
+                <i class="fa-solid fa-box-open text-pink-500"></i>
+                <span>Інвентар</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Central Area -->
+    <main class="w-full max-w-md flex flex-col items-center justify-center my-auto z-10 px-4 py-4">
+        
+        <div class="text-center mb-6 sm:mb-8">
+            <div class="text-xs uppercase tracking-widest text-pink-500 font-bold mb-1">Натапано жуйок</div>
+            <div id="scoreDisplay" class="title-font text-5xl sm:text-7xl font-extrabold text-slate-800 drop-shadow-sm">0</div>
+            <div class="flex items-center justify-center gap-3 sm:gap-4 mt-2 text-xs sm:text-sm text-pink-600/90 font-semibold">
+                <span id="tpsDisplay">⚡ 0 тап/сек</span>
+                <span>•</span>
+                <span id="multiplierDisplay">✨ Сила тапу: x1</span>
+            </div>
+            <!-- Поточний рівень тапу на самій жуйці -->
+            <div id="tapLevelIndicator" class="mt-1 text-[11px] font-bold text-pink-500 bg-white/60 backdrop-blur-xs px-3 py-1 rounded-full inline-block border border-pink-100 shadow-2xs">
+                📈 Рівень тапу: 1 (Базовий)
+            </div>
+        </div>
+
+        <div class="relative flex items-center justify-center my-4 sm:my-6">
+            <div class="absolute w-60 h-60 sm:w-72 sm:h-72 bg-pink-400/30 rounded-full blur-2xl pointer-events-none animate-pulse"></div>
+            
+            <button id="clickBtn" onclick="handleTap(event)" class="floating-button hover-scale relative w-52 h-52 sm:w-60 sm:h-60 rounded-full bg-gradient-to-tr from-pink-400 via-rose-300 to-pink-200 border-4 border-white shadow-2xl flex flex-col items-center justify-center cursor-pointer p-4">
+                <div id="gumGraphicContainer" class="w-full h-full bg-white/95 rounded-full shadow-inner border border-pink-200 flex flex-col items-center justify-center p-2 relative overflow-hidden transition-transform">
+                    <div id="activeFlavorBrand" class="text-[10px] sm:text-xs uppercase font-extrabold tracking-widest text-pink-400 opacity-90 mb-1">Orbit</div>
+                    <div id="gumPillVisual" class="w-28 h-12 sm:w-32 sm:h-14 rounded-full flex items-center justify-center border border-white/90 my-1 orbit-pill-3d bg-gradient-to-r from-pink-300 via-rose-400 to-pink-500">
+                        <span id="gumEmoji" class="text-lg sm:text-xl filter drop-shadow">🍓</span>
+                    </div>
+                    <div id="activeFlavorName" class="text-[10px] sm:text-xs font-bold text-slate-700 truncate max-w-full px-1 mt-0.5">Полуниця</div>
+                </div>
+            </button>
+        </div>
+
+        <div id="flavorBonusBanner" class="mt-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-pink-200 text-xs text-pink-600 font-semibold shadow-xs flex items-center gap-2">
+            <span>🌟 Скін:</span>
+            <span id="currentFlavorLabel" class="font-bold">Полуниця (x1)</span>
+        </div>
+    </main>
+
+    <!-- Right Floating Shop Button -->
+    <div class="fixed right-4 sm:right-6 bottom-5 sm:bottom-6 z-20 flex flex-col items-end gap-3">
+        <button onclick="openModal('shopModal')" class="floating-button hover-scale bg-white hover:bg-pink-50 text-pink-600 font-bold px-5 sm:px-6 py-3.5 sm:py-4 rounded-3xl shadow-2xl border border-pink-200 flex items-center gap-3 cursor-pointer group">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 bg-pink-100 rounded-2xl flex items-center justify-center text-pink-500 group-hover:rotate-12 transition-transform">
+                <i class="fa-solid fa-store text-base sm:text-lg"></i>
+            </div>
+            <div class="text-left">
+                <div class="text-[10px] sm:text-xs text-pink-400 uppercase font-bold">Магазин</div>
+                <div class="text-xs sm:text-sm font-bold">Прокачка & Кейси</div>
+            </div>
+        </button>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="w-full py-4 text-center text-xs sm:text-sm text-pink-600 font-semibold z-10 bg-white/30 backdrop-blur-xs flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-4">
+        <span>з любовю для Ріти 💖</span>
+        <span class="hidden sm:inline">•</span>
+        <span>Тикай на здоровя ✨</span>
+    </footer>
+
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- SHOP MODAL -->
+    <div id="shopModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-md w-full max-w-lg rounded-3xl shadow-2xl border border-pink-100 flex flex-col max-h-[85vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-5 border-b border-pink-100 flex justify-between items-center bg-pink-50/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-pink-200/60 rounded-xl flex items-center justify-center text-pink-600">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <h3 class="title-font font-bold text-lg text-slate-800">Магазин Orbit</h3>
+                </div>
+                <button onclick="closeModal('shopModal')" class="hover-scale w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
+                
+                <div class="text-xs font-bold uppercase tracking-wider text-pink-500 mb-2">Прокачка клікера</div>
+                
+                <div class="bg-pink-50/70 hover:bg-pink-50 border border-pink-100 rounded-2xl p-4 flex items-center justify-between transition-all">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">🤖</span>
+                            <h4 class="font-bold text-slate-800 text-sm">Авто-клікер</h4>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Збирає жуйки автоматично</p>
+                        <div class="text-xs font-bold text-pink-600 mt-2">Рівень: <span id="autoClickerLevel">0</span> | <span id="autoClickerCost">50</span> тапів</div>
+                    </div>
+                    <button onclick="buyAutoClicker()" class="hover-scale bg-pink-500 hover:bg-pink-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-pink-200 cursor-pointer">
+                        Купити
+                    </button>
+                </div>
+
+                <div class="bg-pink-50/70 hover:bg-pink-50 border border-pink-100 rounded-2xl p-4 flex items-center justify-between transition-all">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">⚡</span>
+                            <h4 class="font-bold text-slate-800 text-sm">Сила тапу (+1)</h4>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Збільшує кількість жуйок за клік</p>
+                        <div class="text-xs font-bold text-pink-600 mt-2">Рівень: <span id="tapPowerLevel">0</span> | <span id="tapPowerCost">30</span> тапів</div>
+                    </div>
+                    <button onclick="buyTapPower()" class="hover-scale bg-pink-500 hover:bg-pink-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-pink-200 cursor-pointer">
+                        Купити
+                    </button>
+                </div>
+
+                <div class="text-xs font-bold uppercase tracking-wider text-pink-500 mt-6 mb-2">Кейси Orbit (Оновлені ціни та баланс)</div>
+                
+                <!-- Small Case (250 taps) -->
+                <div class="bg-gradient-to-r from-slate-100 to-pink-50 border border-pink-200 rounded-2xl p-4 flex items-center justify-between shadow-xs">
+                    <div class="flex-1 pr-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">📦</span>
+                            <h4 class="title-font font-bold text-slate-800 text-sm">Малий кейс</h4>
+                            <button onclick="openChancesModal('small')" class="w-5 h-5 bg-pink-200 hover:bg-pink-300 rounded-full text-[10px] font-bold text-pink-700 flex items-center justify-center cursor-pointer" title="Шанси">?</button>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-0.5">Базові жуйки, дуже круті не випадають.</p>
+                        <div class="text-xs font-bold text-pink-600 mt-2">Ціна: 250 тапів</div>
+                    </div>
+                    <button onclick="buyCase('small')" class="hover-scale bg-pink-500 hover:bg-pink-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-pink-200 cursor-pointer">
+                        Купити
+                    </button>
+                </div>
+
+                <!-- Medium Case (1,500 taps) -->
+                <div class="bg-gradient-to-r from-pink-50 to-rose-100 border border-pink-200 rounded-2xl p-4 flex items-center justify-between shadow-xs">
+                    <div class="flex-1 pr-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">🎁</span>
+                            <h4 class="title-font font-bold text-slate-800 text-sm">Середній кейс</h4>
+                            <button onclick="openChancesModal('medium')" class="w-5 h-5 bg-pink-200 hover:bg-pink-300 rounded-full text-[10px] font-bold text-pink-700 flex items-center justify-center cursor-pointer" title="Шанси">?</button>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-0.5">Гарні шанси на якісніші смаки.</p>
+                        <div class="text-xs font-bold text-rose-600 mt-2">Ціна: 1,500 тапів</div>
+                    </div>
+                    <button onclick="buyCase('medium')" class="hover-scale bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-rose-200 cursor-pointer">
+                        Купити
+                    </button>
+                </div>
+
+                <!-- Premium Case (5,000 taps) -->
+                <div class="bg-gradient-to-r from-rose-100 to-pink-200 border border-pink-300 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                    <div class="flex-1 pr-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">💎</span>
+                            <h4 class="title-font font-bold text-slate-800 text-sm">Стандартний кейс</h4>
+                            <button onclick="openChancesModal('premium')" class="w-5 h-5 bg-pink-300 hover:bg-pink-400 rounded-full text-[10px] font-bold text-pink-800 flex items-center justify-center cursor-pointer" title="Шанси">?</button>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-0.5">Чудовий баланс топових скінів!</p>
+                        <div class="text-xs font-bold text-pink-700 mt-2">Ціна: 5,000 тапів</div>
+                    </div>
+                    <button onclick="buyCase('premium')" class="hover-scale bg-pink-600 hover:bg-pink-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-pink-300 cursor-pointer">
+                        Купити
+                    </button>
+                </div>
+
+                <!-- Elite Case (15,000 taps) - FIXED & BALANCED -->
+                <div class="bg-gradient-to-r from-amber-100 via-yellow-100 to-pink-200 border border-amber-300 rounded-2xl p-4 flex items-center justify-between shadow-md">
+                    <div class="flex-1 pr-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">👑</span>
+                            <h4 class="title-font font-bold text-slate-900 text-sm">Великий елітний кейс</h4>
+                            <button onclick="openChancesModal('elite')" class="w-5 h-5 bg-amber-200 hover:bg-amber-300 rounded-full text-[10px] font-bold text-amber-800 flex items-center justify-center cursor-pointer" title="Шанси">?</button>
+                        </div>
+                        <p class="text-xs text-slate-700 mt-0.5">Виключно преміум жуйки та реальний шанс на ексклюзиви (Петя, Ріта, Ігор, Віталік)!</p>
+                        <div class="text-xs font-bold text-amber-700 mt-2">Ціна: 15,000 тапів</div>
+                    </div>
+                    <button onclick="buyCase('elite')" class="hover-scale bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-amber-200 cursor-pointer">
+                        Купити
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- INVENTORY MODAL -->
+    <div id="inventoryModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-md w-full max-w-lg rounded-3xl shadow-2xl border border-pink-100 flex flex-col max-h-[85vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-5 border-b border-pink-100 flex justify-between items-center bg-pink-50/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-pink-200/60 rounded-xl flex items-center justify-center text-pink-600">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <h3 class="title-font font-bold text-lg text-slate-800">Інвентар (Кейси та Скіни)</h3>
+                </div>
+                <button onclick="closeModal('inventoryModal')" class="hover-scale w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-6">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-pink-500 mb-3">Ваші кейси для відкриття</h4>
+                    <div id="casesInventoryGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <hr class="border-pink-100">
+
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-pink-500 mb-3">Колекція смаків Orbit</h4>
+                    <div id="flavorsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHANCES MODAL -->
+    <div id="chancesModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border border-pink-200">
+            <h3 id="chancesModalTitle" class="title-font font-bold text-lg text-slate-800 mb-2">Шанси кейсу</h3>
+            <p id="chancesModalDesc" class="text-xs text-slate-600 mb-6 leading-relaxed"></p>
+            <button onclick="closeModal('chancesModal')" class="hover-scale w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2.5 rounded-2xl cursor-pointer text-xs">
+                Зрозуміло
+            </button>
+        </div>
+    </div>
+
+    <!-- CASE OPENING ROULETTE MODAL (STANDOFF 2 STYLE) -->
+    <div id="caseOpeningModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-pink-500/40 w-full max-w-xl rounded-3xl p-6 shadow-2xl flex flex-col items-center relative overflow-hidden">
+            <div class="text-pink-400 text-xs uppercase tracking-widest font-bold mb-1">Відкриття кейсу Orbit</div>
+            <h3 id="openingCaseTitle" class="title-font text-white text-xl font-extrabold mb-6">Кейс</h3>
+
+            <div class="roulette-container w-full h-40 bg-slate-950 rounded-2xl border border-slate-700 flex items-center relative mb-6 shadow-inner">
+                <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-pink-500 z-20 transform -translate-x-1/2 shadow-lg shadow-pink-500"></div>
+                <div class="absolute left-1/2 -top-2 transform -translate-x-1/2 text-pink-400 z-30 text-xs"><i class="fa-solid fa-caret-down"></i></div>
+
+                <div id="rouletteTrack" class="roulette-track"></div>
+            </div>
+
+            <button id="startSpinBtn" onclick="spinCase()" class="hover-scale bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-pink-500/30 cursor-pointer text-sm">
+                Крутити кейс! 🎰
+            </button>
+            <button id="closeSpinBtn" onclick="closeModal('caseOpeningModal')" class="mt-4 text-xs text-slate-400 hover:text-white cursor-pointer hidden">
+                Закрити
+            </button>
+        </div>
+    </div>
+
+    <!-- REWARD RESULT POPUP -->
+    <div id="rewardModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-md hidden items-center justify-center p-4">
+        <div id="rewardCardBox" class="bg-white rounded-3xl p-6 max-w-xs w-full text-center shadow-2xl border border-pink-200 transform animate-in zoom-in duration-300 relative overflow-hidden">
+            <div id="rewardTagBadge" class="text-[10px] uppercase font-extrabold tracking-wider text-pink-500 mb-1">Новий смак!</div>
+            <div id="rewardIcon" class="text-6xl my-4 animate-bounce">🍓</div>
+            <h3 id="rewardTitle" class="title-font font-bold text-xl text-slate-800 mb-1">Полуниця</h3>
+            <p id="rewardDesc" class="text-xs text-slate-500 mb-6">Базовий смак (x1 множник)</p>
+            <button onclick="closeModal('rewardModal')" class="hover-scale w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-2xl shadow-lg shadow-pink-200 cursor-pointer text-xs">
+                Чудово! 💖
+            </button>
+        </div>
+    </div>
+
+    <!-- PROMO CODES MODAL -->
+    <div id="promoModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-md w-full max-w-sm rounded-3xl shadow-2xl border border-pink-100 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-5 border-b border-pink-100 flex justify-between items-center bg-pink-50/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-pink-200/60 rounded-xl flex items-center justify-center text-pink-600">
+                        <i class="fa-solid fa-ticket"></i>
+                    </div>
+                    <h3 class="title-font font-bold text-lg text-slate-800">Промокоди</h3>
+                </div>
+                <button onclick="closeModal('promoModal')" class="hover-scale w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500">Введіть промокод ("Петя", "М'ята", "Петя Крутой", "Ріта", "Ігор", "Віталік"), щоб отримати ексклюзивний скін!</p>
+                <div>
+                    <input type="text" id="promoInput" placeholder="Введіть промокод..." class="w-full bg-pink-50/60 border border-pink-200 rounded-2xl px-4 py-3 text-sm text-slate-700 outline-none focus:border-pink-500 transition-colors">
+                </div>
+                <button onclick="redeemPromoCode()" class="hover-scale w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-2xl shadow-lg shadow-pink-200 cursor-pointer text-sm">
+                    Активувати 🎁
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-md w-full max-w-sm rounded-3xl shadow-2xl border border-pink-100 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-5 border-b border-pink-100 flex justify-between items-center bg-pink-50/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-pink-200/60 rounded-xl flex items-center justify-center text-pink-600">
+                        <i class="fa-solid fa-gear"></i>
+                    </div>
+                    <h3 class="title-font font-bold text-lg text-slate-800">Налаштування</h3>
+                </div>
+                <button onclick="closeModal('settingsModal')" class="hover-scale w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">Музичний супровід</h4>
+                        <p class="text-xs text-slate-500">Романтична мелодія</p>
+                    </div>
+                    <button id="settingsAudioBtn" onclick="toggleAudio()" class="hover-scale w-12 h-6 bg-pink-300 rounded-full transition-colors relative p-0.5 cursor-pointer">
+                        <div id="settingsAudioThumb" class="w-5 h-5 bg-white rounded-full shadow-md transition-transform transform translate-x-0"></div>
+                    </button>
+                </div>
+                <hr class="border-pink-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">Чорно-білий режим</h4>
+                        <p class="text-xs text-slate-500">Монохромна естетика</p>
+                    </div>
+                    <button onclick="toggleThemeMode()" class="hover-scale w-12 h-6 bg-slate-300 rounded-full transition-colors relative p-0.5 cursor-pointer" id="themeToggleSwitch">
+                        <div id="themeToggleThumb" class="w-5 h-5 bg-white rounded-full shadow-md transition-transform transform translate-x-0"></div>
+                    </button>
+                </div>
+                <hr class="border-pink-100">
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Скидання прогресу</h4>
+                    <p class="text-xs text-slate-500 mb-3">Почати всю гру заново з чистого аркуша.</p>
+                    <button id="resetGameBtn" onclick="startResetCountdown()" class="hover-scale w-full bg-rose-100 hover:bg-rose-200 text-rose-600 border border-rose-200 font-bold py-2.5 rounded-2xl text-xs cursor-pointer">
+                        Почати заново
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        /* --- GAME STATE --- */
+        let gameState = {
+            taps: 0,
+            totalTapsEver: 0,
+            tapPower: 1,
+            tapPowerLevel: 0,
+            autoClickerLevel: 0,
+            autoClickerCost: 50,
+            tapPowerCost: 30,
+            activeFlavorId: 'strawberry',
+            unlockedFlavors: ['strawberry'],
+            cases: {
+                small: 0,
+                medium: 0,
+                premium: 0,
+                elite: 0
+            },
+            redeemedPromoCodes: []
+        };
+
+        /* --- ALL ORBIT FLAVORS DATABASE (INCLUDING VITALIK x500) --- */
+        const flavors = {
+            mintfresh: { id: 'mintfresh', name: "Свіжа м'ята", emoji: '🌿', multiplier: 1, chance: 0.12, desc: 'Освіжаюча класична м\'ята', gradient: 'from-emerald-200 via-teal-300 to-green-400', brandColor: 'text-teal-600', caseTier: 'small' },
+            strawberry: { id: 'strawberry', name: 'Полуниця', emoji: '🍓', multiplier: 1, chance: 0.12, desc: 'Ніжний полуничний смак', gradient: 'from-pink-300 via-rose-400 to-pink-500', brandColor: 'text-pink-400', caseTier: 'small' },
+            classic: { id: 'classic', name: 'Класична', emoji: '⚪', multiplier: 1, chance: 0.12, desc: 'Фірмовий оригінальний смак', gradient: 'from-slate-200 via-zinc-300 to-slate-400', brandColor: 'text-slate-600', caseTier: 'small' },
+            bubblegum: { id: 'bubblegum', name: 'Бабл гам', emoji: '🍬', multiplier: 2, chance: 0.10, desc: 'Улюблений смак дитинства (x2)', gradient: 'from-fuchsia-300 via-pink-400 to-rose-400', brandColor: 'text-fuchsia-500', caseTier: 'small' },
+            apple: { id: 'apple', name: 'Яблуко', emoji: '🍏', multiplier: 2, chance: 0.10, desc: 'Свіже зелене яблуко (x2)', gradient: 'from-lime-300 via-green-400 to-emerald-500', brandColor: 'text-green-500', caseTier: 'small' },
+            
+            eucalyptus: { id: 'eucalyptus', name: 'Евкаліпт', emoji: '🍃', multiplier: 3, chance: 0.08, desc: 'Глибока ментолова прохолода (x3)', gradient: 'from-teal-300 via-cyan-500 to-blue-500', brandColor: 'text-cyan-600', caseTier: 'medium' },
+            wintermint: { id: 'wintermint', name: 'Зимова м\'ята', emoji: '❄️', multiplier: 4, chance: 0.07, desc: 'Морозний зимовий подих (x4)', gradient: 'from-sky-200 via-blue-300 to-indigo-400', brandColor: 'text-blue-500', caseTier: 'medium' },
+            watermelon: { id: 'watermelon', name: 'Кавун', emoji: '🍉', multiplier: 5, chance: 0.06, desc: 'Соковитий річний кавун (x5)', gradient: 'from-emerald-400 via-green-500 to-rose-500', brandColor: 'text-emerald-500', caseTier: 'medium' },
+            sweetmint: { id: 'sweetmint', name: 'Солодка м\'ята', emoji: '🌿', multiplier: 6, chance: 0.05, desc: 'М\'яка солодка прохолода (x6)', gradient: 'from-cyan-200 via-teal-400 to-emerald-500', brandColor: 'text-teal-500', caseTier: 'medium' },
+            orange: { id: 'orange', name: 'Апельсинова', emoji: '🍊', multiplier: 7, chance: 0.05, desc: 'Цитрусовий заряд енергії (x7)', gradient: 'from-amber-300 via-orange-400 to-amber-500', brandColor: 'text-orange-500', caseTier: 'medium' },
+            
+            raspberrygranat: { id: 'raspberrygranat', name: 'Малиновий гранат', emoji: '🍇', multiplier: 10, chance: 0.04, desc: 'Вишукане ягідне поєднання (x10)', gradient: 'from-rose-400 via-pink-600 to-purple-700', brandColor: 'text-rose-600', caseTier: 'premium' },
+            blueberry: { id: 'blueberry', name: 'Лохина', emoji: '🫐', multiplier: 12, chance: 0.03, desc: 'Свіжі лісові ягоди (x12)', gradient: 'from-indigo-400 via-blue-600 to-purple-800', brandColor: 'text-indigo-600', caseTier: 'premium' },
+            fruitcocktail: { id: 'fruitcocktail', name: 'Фруктовий коктейль', emoji: '🍹', multiplier: 15, chance: 0.03, desc: 'Мікс екзотичних фруктів (x15)', gradient: 'from-yellow-300 via-pink-400 to-orange-500', brandColor: 'text-pink-600', caseTier: 'premium' },
+            pineapple: { id: 'pineapple', name: 'Ананасова', emoji: '🍍', multiplier: 18, chance: 0.03, desc: 'Тропічна солодкість ананаса (x18)', gradient: 'from-yellow-200 via-amber-400 to-orange-500', brandColor: 'text-amber-600', caseTier: 'premium' },
+            lime: { id: 'lime', name: 'Лаймова', emoji: '🍋', multiplier: 22, chance: 0.02, desc: 'Кислувато-освіжаючий лайм (x22)', gradient: 'from-lime-200 via-emerald-400 to-green-600', brandColor: 'text-lime-600', caseTier: 'premium' },
+            
+            // Exclusives & Vitalik x500
+            petia: { id: 'petia', name: 'Жувачка Петі', emoji: '👑', multiplier: 50, chance: 0.01, desc: 'ЛЕГЕНДАРНИЙ СКІН! Золотий вибух! (x50)', gradient: 'from-amber-200 via-yellow-400 to-amber-600', brandColor: 'text-amber-600', isExclusive: true, caseTier: 'elite' },
+            rita: { id: 'rita', name: 'Жувачка Ріти', emoji: '💖', multiplier: 75, chance: 0.008, desc: 'УЛЬТРА РІТА ПРЕМІУМ! Рожева магія! (x75)', gradient: 'from-pink-300 via-rose-400 to-fuchsia-600', brandColor: 'text-pink-600', isExclusive: true, caseTier: 'elite' },
+            igor: { id: 'igor', name: 'Жувачка Ігоря', emoji: '⚡', multiplier: 100, chance: 0.005, desc: 'ЕКСКЛЮЗИВ ІГОРЯ! Нестримна сила! (x100)', gradient: 'from-cyan-300 via-blue-500 to-indigo-700', brandColor: 'text-blue-600', isExclusive: true, caseTier: 'elite' },
+            vitalik: { id: 'vitalik', name: 'Жувачка Віталіка x500', emoji: '💎', multiplier: 500, chance: 0.001, desc: 'НАЙКРУТІША ЖУВАЧКА ВІТАЛІКА! Абсолютна міць! (x500)', gradient: 'from-purple-600 via-indigo-500 to-amber-400', brandColor: 'text-purple-600', isExclusive: true, caseTier: 'elite' }
+        };
+
+        const randomEmojis = ['💖', '✨', '🍓', '🌿', '🍉', '🍬', '⭐', '🌸', '💫', '🧊'];
+
+        function saveGame() {
+            localStorage.setItem('orbitClickerRitaStableState', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('orbitClickerRitaStableState');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                } catch (e) {
+                    console.error("Load save error", e);
+                }
+            }
+            updateUI();
+        }
+
+        /* --- AUDIO SYNTHESIZER --- */
+        let audioInitialized = false;
+        let isMuted = true;
+        let synth = null;
+        let melodyLoop = null;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            Tone.start();
+            
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: 'sine' },
+                envelope: { attack: 0.8, decay: 1.2, sustain: 0.4, release: 2 }
+            }).toDestination();
+            synth.volume.value = -12;
+
+            const notes = [
+                ['C4', 'E4', 'G4', 'B4'],
+                ['A3', 'C4', 'E4', 'G4'],
+                ['F3', 'A3', 'C4', 'E4'],
+                ['G3', 'B3', 'D4', 'F4']
+            ];
+
+            let chordIndex = 0;
+            melodyLoop = new Tone.Loop(time => {
+                if (!isMuted) {
+                    synth.triggerAttackRelease(notes[chordIndex], '2n', time);
+                    chordIndex = (chordIndex + 1) % notes.length;
+                }
+            }, '2n').start(0);
+
+            Tone.Transport.bpm.value = 75;
+            Tone.Transport.start();
+            audioInitialized = true;
+        }
+
+        function toggleAudio() {
+            if (!audioInitialized) initAudio();
+            isMuted = !isMuted;
+            
+            const soundIcon = document.getElementById('soundIcon');
+            const settingsAudioThumb = document.getElementById('settingsAudioThumb');
+            const settingsAudioBtn = document.getElementById('settingsAudioBtn');
+
+            if (isMuted) {
+                soundIcon.className = "fa-solid fa-volume-xmark text-base sm:text-lg";
+                settingsAudioThumb.style.transform = 'translateX(0px)';
+                settingsAudioBtn.classList.remove('bg-pink-500');
+                settingsAudioBtn.classList.add('bg-pink-300');
+            } else {
+                soundIcon.className = "fa-solid fa-volume-high text-base sm:text-lg";
+                settingsAudioThumb.style.transform = 'translateX(24px)';
+                settingsAudioBtn.classList.remove('bg-pink-300');
+                settingsAudioBtn.classList.add('bg-pink-500');
+                if (synth) synth.triggerAttackRelease(['C5', 'E5', 'G5'], '8n');
+            }
+        }
+
+        /* --- THEME TOGGLE --- */
+        let isBWMode = false;
+        function toggleThemeMode() {
+            isBWMode = !isBWMode;
+            const body = document.getElementById('mainBody');
+            const thumb = document.getElementById('themeToggleThumb');
+            const switchBtn = document.getElementById('themeToggleSwitch');
+
+            if (isBWMode) {
+                body.classList.add('bw-mode');
+                thumb.style.transform = 'translateX(24px)';
+                switchBtn.classList.remove('bg-slate-300');
+                switchBtn.classList.add('bg-slate-700');
+            } else {
+                body.classList.remove('bw-mode');
+                thumb.style.transform = 'translateX(0px)';
+                switchBtn.classList.remove('bg-slate-700');
+                switchBtn.classList.add('bg-slate-300');
+            }
+        }
+
+        /* --- TAP LOGIC & FLOATING EMOJI --- */
+        let airRaidPenaltyActive = false;
+
+        function handleTap(e) {
+            const activeFlavor = flavors[gameState.activeFlavorId] || flavors.strawberry;
+            let clickValue = gameState.tapPower * activeFlavor.multiplier;
+
+            if (airRaidPenaltyActive) {
+                clickValue = Math.max(1, Math.floor(clickValue / 3));
+            }
+
+            gameState.taps += clickValue;
+            gameState.totalTapsEver += clickValue;
+
+            const btn = document.getElementById('clickBtn');
+            btn.classList.add('bounce-anim');
+            setTimeout(() => btn.classList.remove('bounce-anim'), 90);
+
+            createFloatingNumber(e, clickValue);
+            createRandomFloatingEmoji(e);
+
+            updateUI();
+            saveGame();
+        }
+
+        function createFloatingNumber(e, value) {
+            const el = document.createElement('div');
+            el.innerText = `+${value}`;
+            el.className = 'absolute text-pink-600 font-bold text-lg pointer-events-none transition-all duration-700 z-30 title-font';
+            
+            let x = window.innerWidth / 2;
+            let y = window.innerHeight / 2 - 50;
+            if (e && e.clientX) {
+                x = e.clientX;
+                y = e.clientY;
+            } else if (e && e.touches && e.touches[0]) {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            }
+            
+            el.style.left = `${x + (Math.random() * 50 - 25)}px`;
+            el.style.top = `${y}px`;
+            document.body.appendChild(el);
+
+            setTimeout(() => {
+                el.style.transform = 'translateY(-70px) scale(1.25)';
+                el.style.opacity = '0';
+            }, 20);
+            setTimeout(() => el.remove(), 720);
+        }
+
+        function createRandomFloatingEmoji(e) {
+            const el = document.createElement('div');
+            const randomEmoji = randomEmojis[Math.floor(Math.random() * randomEmojis.length)];
+            el.innerText = randomEmoji;
+            el.className = 'absolute text-2xl pointer-events-none transition-all duration-1000 z-30';
+
+            let x = Math.random() * (window.innerWidth - 60) + 30;
+            let y = Math.random() * (window.innerHeight - 200) + 100;
+
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            document.body.appendChild(el);
+
+            setTimeout(() => {
+                el.style.transform = `translateY(-90px) translateX(${Math.random() * 40 - 20}px) scale(1.4) rotate(${Math.random() * 60 - 30}deg)`;
+                el.style.opacity = '0';
+            }, 20);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        /* --- SHOP & BALANCED ECONOMY (Lower growth % per level) --- */
+        function buyAutoClicker() {
+            if (gameState.taps >= gameState.autoClickerCost) {
+                gameState.taps -= gameState.autoClickerCost;
+                gameState.autoClickerLevel++;
+                // Зменшено відсоток зростання ціни (було 1.35, стало 1.20 для м'якшої прокачки)
+                gameState.autoClickerCost = Math.floor(gameState.autoClickerCost * 1.20);
+                updateUI();
+                saveGame();
+            } else {
+                showToast("Недостатньо тапів!");
+            }
+        }
+
+        function buyTapPower() {
+            if (gameState.taps >= gameState.tapPowerCost) {
+                gameState.taps -= gameState.tapPowerCost;
+                gameState.tapPowerLevel++;
+                gameState.tapPower++;
+                // Зменшено відсоток зростання ціни (було 1.4, стало 1.25)
+                gameState.tapPowerCost = Math.floor(gameState.tapPowerCost * 1.25);
+                updateUI();
+                saveGame();
+            } else {
+                showToast("Недостатньо тапів!");
+            }
+        }
+
+        /* Cases purchasing & inventory (Підвищені ціни) */
+        const casePrices = {
+            small: 250,
+            medium: 1500,
+            premium: 5000,
+            elite: 15000
+        };
+
+        function buyCase(tier) {
+            const cost = casePrices[tier];
+            if (gameState.taps >= cost) {
+                gameState.taps -= cost;
+                gameState.cases[tier] = (gameState.cases[tier] || 0) + 1;
+                updateUI();
+                saveGame();
+                showToast(`Успішно придбано кейс (${tier})! Відкрийте його в інвентарі.`);
+            } else {
+                showToast("Недостатньо тапів для покупки кейсу!");
+            }
+        }
+
+        function openChancesModal(tier) {
+            const modalTitle = document.getElementById('chancesModalTitle');
+            const modalDesc = document.getElementById('chancesModalDesc');
+
+            if (tier === 'small') {
+                modalTitle.innerText = "Шанси: Малий кейс (250 тапів)";
+                modalDesc.innerText = "З цього кейса випадають тільки базові та прості жуйки.";
+            } else if (tier === 'medium') {
+                modalTitle.innerText = "Шанси: Середній кейс (1,500 тапів)";
+                modalDesc.innerText = "Гарні шанси на отримання якісних смаків середнього рівня.";
+            } else if (tier === 'premium') {
+                modalTitle.innerText = "Шанси: Стандартний кейс (5,000 тапів)";
+                modalDesc.innerText = "Збалансований кейс з чудовими шансами на круті скіни Orbit.";
+            } else if (tier === 'elite') {
+                modalTitle.innerText = "Шанси: Великий елітний кейс (15,000 тапів)";
+                modalDesc.innerText = "Преміальний кейс. Жодних слабких жуйок! Виключно преміум смаки та шанс вибити ексклюзиви (Петя, Ріта, Ігор, Віталік x500)!";
+            }
+            openModal('chancesModal');
+        }
+
+        /* --- STANDOFF 2 STYLE CASE OPENING ROULETTE --- */
+        let currentOpeningTier = null;
+
+        function openCaseFromInventory(tier) {
+            if ((gameState.cases[tier] || 0) <= 0) {
+                showToast("У вас немає цього кейсу в інвентарі!");
+                return;
+            }
+            gameState.cases[tier]--;
+            currentOpeningTier = tier;
+            closeModal('inventoryModal');
+
+            document.getElementById('openingCaseTitle').innerText = `Відкриття кейсу: ${tier.toUpperCase()}`;
+            setupRoulette(tier);
+            openModal('caseOpeningModal');
+            document.getElementById('startSpinBtn').classList.remove('hidden');
+            document.getElementById('closeSpinBtn').classList.add('hidden');
+        }
+
+        let wonFlavor = null;
+
+        function setupRoulette(tier) {
+            const track = document.getElementById('rouletteTrack');
+            track.innerHTML = '';
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0px)';
+
+            const pool = getFlavorPoolForTier(tier);
+            const items = [];
+            for (let i = 0; i < 40; i++) {
+                items.push(pool[Math.floor(Math.random() * pool.length)]);
+            }
+
+            wonFlavor = rollFlavorByTier(tier);
+            items[30] = wonFlavor;
+
+            items.forEach(flavor => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `roulette-item bg-gradient-to-r ${flavor.gradient} ${flavor.isExclusive ? 'legendary-glow' : ''}`;
+                itemDiv.innerHTML = `
+                    <div class="text-3xl filter drop-shadow mb-1">${flavor.emoji}</div>
+                    <div class="text-[10px] font-bold text-white text-center px-1 truncate max-w-full">${flavor.name}</div>
+                `;
+                track.appendChild(itemDiv);
+            });
+        }
+
+        /* ВИПРАВЛЕНИЙ ЕЛІТНИЙ КЕЙС: Тільки топ та ексклюзиви */
+        function getFlavorPoolForTier(tier) {
+            return Object.values(flavors).filter(f => {
+                if (tier === 'small') return f.caseTier === 'small';
+                if (tier === 'medium') return f.caseTier === 'medium';
+                if (tier === 'premium') return f.caseTier === 'premium' || f.caseTier === 'medium';
+                if (tier === 'elite') return f.caseTier === 'premium' || f.isExclusive; // Повністю виключено жуйку Ігоря як "ізі" випад, додано збалансований топ-пул
+                return true;
+            });
+        }
+
+        function rollFlavorByTier(tier) {
+            const pool = getFlavorPoolForTier(tier);
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        function spinCase() {
+            const spinBtn = document.getElementById('startSpinBtn');
+            spinBtn.classList.add('hidden');
+
+            const track = document.getElementById('rouletteTrack');
+            const targetTranslate = -(30 * 136 - 140);
+            
+            track.style.transition = 'transform 4s cubic-bezier(0.12, 0.8, 0.2, 1)';
+            track.style.transform = `translateX(${targetTranslate}px)`;
+
+            setTimeout(() => {
+                const isNew = !gameState.unlockedFlavors.includes(wonFlavor.id);
+                if (isNew) {
+                    gameState.unlockedFlavors.push(wonFlavor.id);
+                }
+
+                closeModal('caseOpeningModal');
+                showRewardPopup(wonFlavor, isNew);
+
+                if (wonFlavor.isExclusive) {
+                    triggerLegendaryGoldEvent();
+                    if (!isMuted && synth) synth.triggerAttackRelease(['C5', 'E5', 'G5', 'B5', 'C6'], '2n');
+                } else if (isNew) {
+                    triggerSmileysBackgroundEffect();
+                }
+
+                updateUI();
+                saveGame();
+            }, 4100);
+        }
+
+        function triggerSmileysBackgroundEffect() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.innerText = randomEmojis[Math.floor(Math.random() * randomEmojis.length)];
+                    el.className = 'absolute text-4xl pointer-events-none z-40 transition-all duration-1000';
+                    el.style.left = `${Math.random() * window.innerWidth}px`;
+                    el.style.top = `${Math.random() * window.innerHeight}px`;
+                    document.body.appendChild(el);
+                    setTimeout(() => {
+                        el.style.transform = 'scale(2) translateY(-50px)';
+                        el.style.opacity = '0';
+                    }, 50);
+                    setTimeout(() => el.remove(), 1100);
+                }, i * 120);
+            }
+        }
+
+        function triggerLegendaryGoldEvent() {
+            confetti({
+                particleCount: 200,
+                spread: 120,
+                origin: { y: 0.5 },
+                colors: ['#f59e0b', '#fbbf24', '#ffffff', '#fb7185', '#ec4899', '#8b5cf6']
+            });
+
+            const body = document.getElementById('mainBody');
+            body.classList.add('golden-interface');
+            showToast("🌟 ЛЕГЕНДАРНИЙ ВИПАДІВ! Золотий інтерфейс активховано на 5 секунд!");
+
+            setTimeout(() => {
+                body.classList.remove('golden-interface');
+            }, 5000);
+        }
+
+        function showRewardPopup(flavor, isNew) {
+            document.getElementById('rewardIcon').innerText = flavor.emoji;
+            document.getElementById('rewardTitle').innerText = flavor.name;
+            document.getElementById('rewardDesc').innerText = flavor.desc;
+            document.getElementById('rewardTagBadge').innerText = isNew ? '🎉 Новий скін в колекції!' : 'Вже є в інвентарі';
+            openModal('rewardModal');
+        }
+
+        function setActiveFlavor(flavorId) {
+            if (gameState.unlockedFlavors.includes(flavorId)) {
+                gameState.activeFlavorId = flavorId;
+                updateUI();
+                saveGame();
+                renderInventory();
+                showToast(`Вибрано скін: ${flavors[flavorId].name}`);
+            }
+        }
+
+        /* --- PROMO CODE SYSTEM (З додаванням промокоду на Віталіка) --- */
+        function redeemPromoCode() {
+            const input = document.getElementById('promoInput');
+            const code = input.value.trim().toLowerCase();
+
+            if (!code) {
+                showToast("Введіть промокод!");
+                return;
+            }
+
+            if (gameState.redeemedPromoCodes.includes(code)) {
+                showToast("Цей промокод вже активовано!");
+                return;
+            }
+
+            if (code === 'петя' || code === 'petia') {
+                gameState.redeemedPromoCodes.push(code);
+                if (!gameState.unlockedFlavors.includes('petia')) gameState.unlockedFlavors.push('petia');
+                gameState.activeFlavorId = 'petia';
+                triggerLegendaryGoldEvent();
+                showToast("👑 Промокод активовано! Отримано Жувачку Петі!");
+                closeModal('promoModal');
+                input.value = '';
+            } else if (code === 'петя крутой' || code === 'петяркутой') {
+                gameState.redeemedPromoCodes.push(code);
+                if (!gameState.unlockedFlavors.includes('igor')) gameState.unlockedFlavors.push('igor');
+                gameState.activeFlavorId = 'igor';
+                triggerLegendaryGoldEvent();
+                showToast("⚡ Промокод активовано! Отримано Жувачку Ігоря!");
+                closeModal('promoModal');
+                input.value = '';
+            } else if (code === 'м\'ята' || code === 'мята' || code === 'mint') {
+                gameState.redeemedPromoCodes.push(code);
+                if (!gameState.unlockedFlavors.includes('mintfresh')) gameState.unlockedFlavors.push('mintfresh');
+                gameState.activeFlavorId = 'mintfresh';
+                triggerSmileysBackgroundEffect();
+                showToast("🌿 Промокод активовано! Отримано Свіжу м'яту!");
+                closeModal('promoModal');
+                input.value = '';
+            } else if (code === 'ріта' || code === 'rita') {
+                gameState.redeemedPromoCodes.push(code);
+                if (!gameState.unlockedFlavors.includes('rita')) gameState.unlockedFlavors.push('rita');
+                gameState.activeFlavorId = 'rita';
+                triggerLegendaryGoldEvent();
+                showToast("💖 Промокод активовано! Отримано Жувачку Ріти!");
+                closeModal('promoModal');
+                input.value = '';
+            } else if (code === 'ігор' || code === 'igor') {
+                gameState.redeemedPromoCodes.push(code);
+                if (!gameState.unlockedFlavors.includes('igor')) gameState.unlockedFlavors.push('igor');
+                gameState.activeFlavorId = 'igor';
+                triggerLegendaryGoldEvent();
+                showToast("⚡ Промокод активовано! Отримано Жувачку Ігоря!");
+                closeModal('promoModal');
+                input.value = '';
+            } else if (code === 'віталік' || code === 'vitalik' || code === 'віталій') {
+                gameState.redeemedPromoCodes.push(code);
+                if (!gameState.unlockedFlavors.includes('vitalik')) gameState.unlockedFlavors.push('vitalik');
+                gameState.activeFlavorId = 'vitalik';
+                triggerLegendaryGoldEvent();
+                showToast("💎 Промокод активовано! Отримано найкрутішу Жувачку Віталіка x500!");
+                closeModal('promoModal');
+                input.value = '';
+            } else {
+                showToast("❌ Невірний промокод!");
+                return;
+            }
+            updateUI();
+            saveGame();
+        }
+
+        /* --- RANDOM EVENTS SYSTEM --- */
+        function triggerRandomEvent() {
+            const rand = Math.random();
+            if (rand < 0.33) {
+                startPetiaHungryEvent();
+            } else if (rand < 0.66) {
+                startRitaBirthdayEvent();
+            } else {
+                startAirRaidEvent();
+            }
+        }
+
+        function showEventBanner(text) {
+            const banner = document.getElementById('eventNotificationBanner');
+            const textEl = document.getElementById('eventBannerText');
+            textEl.innerText = text;
+            banner.classList.remove('hidden');
+        }
+
+        function hideEventBanner() {
+            document.getElementById('eventNotificationBanner').classList.add('hidden');
+        }
+
+        function startPetiaHungryEvent() {
+            showEventBanner("⚠️ Івент: Петя проголодався! Забирає по 100 тапів щосекунди (10с)");
+            const body = document.getElementById('mainBody');
+            body.style.filter = 'brightness(0.85) contrast(110%)';
+
+            let secondsLeft = 10;
+            const timer = setInterval(() => {
+                secondsLeft--;
+                gameState.taps = Math.max(0, gameState.taps - 100);
+                updateUI();
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    body.style.filter = 'none';
+                    hideEventBanner();
+                    showToast("Івент завершився: Петя наївся!");
+                }
+            }, 1000);
+        }
+
+        function startRitaBirthdayEvent() {
+            showEventBanner("🎉 Івент: День народження Ріти! +1000 тапів/сек та +5 середніх кейсів! (10с)");
+            const body = document.getElementById('mainBody');
+            body.classList.add('golden-interface');
+            gameState.cases.medium = (gameState.cases.medium || 0) + 5;
+            triggerLegendaryGoldEvent();
+
+            let secondsLeft = 10;
+            const timer = setInterval(() => {
+                secondsLeft--;
+                gameState.taps += 1000;
+                updateUI();
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    body.classList.remove('golden-interface');
+                    hideEventBanner();
+                    showToast("Святковий івент завершено!");
+                }
+            }, 1000);
+        }
+
+        function startAirRaidEvent() {
+            showEventBanner("🚨 Івент: Повітряна тривога! Кліки приносять у 3 рази менше (20с)");
+            const body = document.getElementById('mainBody');
+            body.classList.add('air-raid-active');
+            airRaidPenaltyActive = true;
+
+            let secondsLeft = 20;
+            const timer = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    body.classList.remove('air-raid-active');
+                    airRaidPenaltyActive = false;
+                    hideEventBanner();
+                    showToast("Відбій повітряної тривоги!");
+                }
+            }, 1000);
+        }
+
+        setInterval(() => {
+            if (Math.random() < 0.4) {
+                triggerRandomEvent();
+            }
+        }, 90000);
+
+
+        /* --- AUTO-CLICKER INTERVAL --- */
+        setInterval(() => {
+            if (gameState.autoClickerLevel > 0) {
+                const activeFlavor = flavors[gameState.activeFlavorId] || flavors.strawberry;
+                const passiveGain = gameState.autoClickerLevel * activeFlavor.multiplier;
+                gameState.taps += passiveGain;
+                gameState.totalTapsEver += passiveGain;
+                updateUI();
+            }
+        }, 1000);
+
+
+        /* --- RESET GAME WITH 3-SECOND CONFIRMATION TIMER --- */
+        let resetTimerInstance = null;
+        let resetSecondsLeft = 3;
+
+        function startResetCountdown() {
+            const btn = document.getElementById('resetGameBtn');
+            if (resetTimerInstance) return;
+
+            resetSecondsLeft = 3;
+            btn.innerText = `Підтвердіть скидання (${resetSecondsLeft}с)...`;
+            btn.className = "hover-scale w-full bg-red-600 text-white font-bold py-2.5 rounded-2xl text-xs cursor-pointer animate-pulse";
+
+            resetTimerInstance = setInterval(() => {
+                resetSecondsLeft--;
+                if (resetSecondsLeft > 0) {
+                    btn.innerText = `Підтвердіть скидання (${resetSecondsLeft}с)...`;
+                } else {
+                    clearInterval(resetTimerInstance);
+                    resetTimerInstance = null;
+                    executeGameReset();
+                }
+            }, 1000);
+        }
+
+        function executeGameReset() {
+            localStorage.removeItem('orbitClickerRitaStableState');
+            gameState = {
+                taps: 0,
+                totalTapsEver: 0,
+                tapPower: 1,
+                tapPowerLevel: 0,
+                autoClickerLevel: 0,
+                autoClickerCost: 50,
+                tapPowerCost: 30,
+                activeFlavorId: 'strawberry',
+                unlockedFlavors: ['strawberry'],
+                cases: { small: 0, medium: 0, premium: 0, elite: 0 },
+                redeemedPromoCodes: []
+            };
+            
+            const btn = document.getElementById('resetGameBtn');
+            btn.innerText = "Почати заново";
+            btn.className = "hover-scale w-full bg-rose-100 hover:bg-rose-200 text-rose-600 border border-rose-200 font-bold py-2.5 rounded-2xl text-xs cursor-pointer";
+
+            updateUI();
+            closeModal('settingsModal');
+            showToast("Гра повністю скинута до початкового стану.");
+        }
+
+
+        /* --- UI UPDATES & RENDERERS --- */
+        function updateUI() {
+            document.getElementById('scoreDisplay').innerText = Math.floor(gameState.taps).toLocaleString();
+            document.getElementById('tpsDisplay').innerText = `⚡ ${gameState.autoClickerLevel} тап/сек`;
+            
+            const activeFlavor = flavors[gameState.activeFlavorId] || flavors.strawberry;
+            let currentMultiplier = gameState.tapPower * activeFlavor.multiplier;
+            if (airRaidPenaltyActive) currentMultiplier = Math.max(1, Math.floor(currentMultiplier / 3));
+
+            document.getElementById('multiplierDisplay').innerText = `✨ Сила тапу: x${currentMultiplier}`;
+            document.getElementById('tapLevelIndicator').innerText = `📈 Рівень тапу: ${gameState.tapPowerLevel + 1} (Сила: x${gameState.tapPower})`;
+
+            const brandEl = document.getElementById('activeFlavorBrand');
+            brandEl.className = `absolute top-1 text-[9px] sm:text-[10px] uppercase font-extrabold tracking-widest ${activeFlavor.brandColor}`;
+            brandEl.innerText = activeFlavor.isExclusive ? `⭐ ${activeFlavor.name} ⭐` : 'Orbit';
+
+            const pillVisual = document.getElementById('gumPillVisual');
+            pillVisual.className = `w-32 h-14 sm:w-36 sm:h-16 rounded-full flex items-center justify-center border border-white/90 my-1 orbit-pill-3d bg-gradient-to-r ${activeFlavor.gradient} ${activeFlavor.isExclusive ? 'legendary-glow' : ''}`;
+            
+            document.getElementById('gumEmoji').innerText = activeFlavor.emoji;
+            document.getElementById('activeFlavorName').innerText = activeFlavor.name;
+            document.getElementById('currentFlavorLabel').innerText = `${activeFlavor.name} (x${activeFlavor.multiplier})`;
+
+            document.getElementById('autoClickerLevel').innerText = gameState.autoClickerLevel;
+            document.getElementById('autoClickerCost').innerText = gameState.autoClickerCost;
+            document.getElementById('tapPowerLevel').innerText = gameState.tapPowerLevel;
+            document.getElementById('tapPowerCost').innerText = gameState.tapPowerCost;
+
+            renderCasesInventory();
+            renderInventory();
+        }
+
+        function renderCasesInventory() {
+            const grid = document.getElementById('casesInventoryGrid');
+            grid.innerHTML = '';
+
+            const caseNames = {
+                small: { name: 'Малий кейс', emoji: '📦', color: 'from-slate-100 to-pink-50' },
+                medium: { name: 'Середній кейс', emoji: '🎁', color: 'from-pink-50 to-rose-100' },
+                premium: { name: 'Стандартний', emoji: '💎', color: 'from-rose-100 to-pink-200' },
+                elite: { name: 'Елітний кейс', emoji: '👑', color: 'from-amber-100 to-yellow-200' }
+            };
+
+            for (let tier in gameState.cases) {
+                const count = gameState.cases[tier] || 0;
+                const info = caseNames[tier];
+
+                const card = document.createElement('div');
+                card.className = `bg-gradient-to-r ${info.color} border border-pink-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center shadow-xs`;
+                card.innerHTML = `
+                    <div class="text-3xl mb-1">${info.emoji}</div>
+                    <div class="font-bold text-slate-800 text-xs mb-0.5">${info.name}</div>
+                    <div class="text-[10px] text-pink-600 font-bold mb-2">Кількість: ${count}</div>
+                    <button onclick="openCaseFromInventory('${tier}')" ${count <= 0 ? 'disabled' : ''} class="hover-scale w-full bg-pink-500 hover:bg-pink-600 disabled:bg-slate-300 text-white font-bold py-1.5 rounded-xl text-[10px] shadow-sm cursor-pointer">
+                        Відкрити
+                    </button>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function renderInventory() {
+            const grid = document.getElementById('flavorsGrid');
+            grid.innerHTML = '';
+
+            for (let key in flavors) {
+                const flavor = flavors[key];
+                const isUnlocked = gameState.unlockedFlavors.includes(flavor.id);
+                const isActive = gameState.activeFlavorId === flavor.id;
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${
+                    isActive 
+                        ? 'bg-pink-100 border-pink-400 shadow-sm' 
+                        : isUnlocked 
+                            ? 'bg-pink-50/60 border-pink-200 hover:bg-pink-50' 
+                            : 'bg-slate-100/70 border-slate-200 opacity-65'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-10 sm:w-14 sm:h-12 rounded-2xl bg-white shadow-sm border border-pink-100 flex items-center justify-center relative overflow-hidden">
+                            ${isUnlocked ? `
+                                <div class="w-10 h-5 sm:w-11 sm:h-6 rounded-full orbit-pill-3d bg-gradient-to-r ${flavor.gradient} flex items-center justify-center shadow-xs">
+                                    <span class="text-xs filter drop-shadow">${flavor.emoji}</span>
+                                </div>
+                            ` : '<span class="text-xl">🔒</span>'}
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-800 text-xs sm:text-sm">${isUnlocked ? flavor.name : 'Невідомо'}</h5>
+                            <p class="text-[10px] sm:text-[11px] text-slate-500">${isUnlocked ? `Множник: x${flavor.multiplier}` : `Кейс: ${flavor.caseTier}`}</p>
+                        </div>
+                    </div>
+                    <div>
+                        ${isUnlocked ? (
+                            isActive 
+                                ? '<span class="text-[11px] bg-pink-500 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs">Активний</span>' 
+                                : `<button onclick="setActiveFlavor('${flavor.id}')" class="hover-scale bg-white hover:bg-pink-50 text-pink-600 border border-pink-200 text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer">Вибрати</button>`
+                        ) : '<span class="text-xs text-slate-400 font-semibold">Закрито</span>'}
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById(modalId).classList.add('flex');
+            if (modalId === 'inventoryModal') {
+                renderCasesInventory();
+                renderInventory();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('flex');
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showToast(message) {
+            const existing = document.getElementById('customToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'customToast';
+            toast.innerText = message;
+            toast.className = 'fixed bottom-16 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-bottom-4 duration-300 text-center max-w-xs';
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2600);
+        }
+
+        window.onload = function() {
+            loadGame();
+        };
+    </script>
+</body>
+</html>
